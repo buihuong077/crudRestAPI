@@ -1,22 +1,28 @@
 import React, { useEffect, useState } from "react";
-
+import axios from "axios";
 function TablePet() {
   const [valueName, setValueName] = useState("");
   const [valueAge, setValueAge] = useState("");
   const [weightValue, setWeightValue] = useState("");
   const [lengthValue, setLengthValue] = useState("");
+  const [pets, setPet] = useState([]);
 
-  //   useEffect(() =>{
-  //     postPet()
-  //   },[])
+  const postPet = async () => {
+    const res = await axios.post(
+      "https://crudcrud.com/api/3bfd2cf10062492b9f5984b5099b1a7c/pet",
+      {
+        name: valueName,
+        age: valueAge,
+        weight: weightValue,
+        height: lengthValue,
+      }
+    );
 
-  //   const postPet = async() => {
-  //     try{
-  //        const res = await post
-  //     }
-  //   }catch(error){
-  //     console.log(error)
-  //   }
+    setPet((prev) => {
+      return [...prev, res.data];
+    });
+  };
+
   const handleValueName = (e) => {
     setValueName(e.target.value);
   };
@@ -37,7 +43,9 @@ function TablePet() {
     setValueAge("");
     setWeightValue("");
     setLengthValue("");
+    postPet();
   };
+
   return (
     <div>
       <p className=" font-bold text-[20px] mb-5">Table create pet</p>
