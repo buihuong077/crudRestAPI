@@ -1,28 +1,40 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import { BaseUrl } from "../baseUrl/url";
+import ListPet from "./listPet";
+
 function TablePet() {
   const [valueName, setValueName] = useState("");
+  const [errorName, setErrorName] = useState("");
   const [valueAge, setValueAge] = useState("");
+  const [errorAge, setErrorAge] = useState("");
   const [weightValue, setWeightValue] = useState("");
+  const [errorWeight, setErrorWeight] = useState("");
   const [lengthValue, setLengthValue] = useState("");
-  const [pets, setPet] = useState([]);
+  const [lengthError, setLengthError] = useState("");
+  const [pets, setPets] = useState([]);
 
-  const postPet = async () => {
-    const res = await axios.post(
-      "https://crudcrud.com/api/3bfd2cf10062492b9f5984b5099b1a7c/pet",
-      {
+  useEffect(() => {
+    getPets();
+  }, []);
+
+  const postPet = useMemo(() => {
+    return async () => {
+      const res = await axios.post(`${BaseUrl}/pet`, {
         name: valueName,
         age: valueAge,
         weight: weightValue,
         height: lengthValue,
-      }
-    );
+      });
+      //@ts-ignore
+      setPets((prev) => [...prev, res.data]);
+    };
+  }, []);
 
-    setPet((prev) => {
-      return [...prev, res.data];
-    });
+  const getPets = async () => {
+    const res = await axios.get(`${BaseUrl}/pet`);
+    setPets(res.data);
   };
-
   const handleValueName = (e) => {
     setValueName(e.target.value);
   };
@@ -38,7 +50,22 @@ function TablePet() {
   };
 
   const handleAddPet = () => {
-    console.log(valueName, valueAge, weightValue, lengthValue);
+    if (!valueName) {
+      setErrorName("Please fill in your name in the form");
+      return;
+    }
+    if (!valueAge) {
+      setErrorAge("Please fill in your Age in the form");
+      return;
+    }
+    if (!weightValue) {
+      setErrorWeight("Please fill in your weight in the form");
+      return;
+    }
+    if (!lengthValue) {
+      setLengthError("Please fill in your length in the form");
+      return;
+    }
     setValueName("");
     setValueAge("");
     setWeightValue("");
@@ -48,35 +75,41 @@ function TablePet() {
 
   return (
     <div>
-      <p className=" font-bold text-[20px] mb-5">Table create pet</p>
+      <p className=" font-bold text-5 mb-5">Table create pet</p>
 
       <div>
         <div className="w-[300px] flex mt-4">
           <span className="mr-3 w-[50px]">Name</span>
-          <input
-            onChange={handleValueName}
-            value={valueName}
-            className=" border-[1px] border-[#333] px-1"
-            type="text"
-          />
+          <div>
+            <input
+              onChange={handleValueName}
+              value={valueName}
+              className=" border-[1px] border-[#333] px-1"
+            />
+            {errorName && <p className="text-rose-400">{errorName}</p>}
+          </div>
         </div>
         <div className="w-[300px] flex mt-4">
           <span className="mr-3 w-[50px]">Age</span>
-          <input
-            onChange={handleValueAge}
-            value={valueAge}
-            className=" border-[1px] border-[#333] px-1 "
-            type="text"
-          />
+          <div>
+            <input
+              onChange={handleValueAge}
+              value={valueAge}
+              className=" border-[1px] border-[#333] px-1 "
+            />
+            {errorAge && <p className="text-rose-400">{errorAge}</p>}
+          </div>
         </div>
         <div className="w-[300px] flex mt-4">
           <span className="mr-3 w-[50px]">Weight</span>
-          <input
-            onChange={handleValueWeight}
-            value={weightValue}
-            className=" border-[1px] border-[#333] px-1"
-            type="text"
-          />
+          <div>
+            <input
+              onChange={handleValueWeight}
+              value={weightValue}
+              className=" border-[1px] border-[#333] px-1"
+            />
+            {errorWeight && <p className="text-rose-400">{errorWeight}</p>}
+          </div>
         </div>
         <div className="w-[300px] flex mt-4">
           <span className="mr-3 w-[50px]">Length</span>
@@ -84,18 +117,19 @@ function TablePet() {
             onChange={handleValueheight}
             value={lengthValue}
             className=" border-[1px] border-[#333] px-1"
-            type="text"
           />
+          {lengthError && <p className="text-rose-400">{lengthError}</p>}
         </div>
-        <div className="mt-5 ">
-          <span>Species</span>
-          <select name="" className=" border-[1px] border-[#333]" id="">
-            <option value="dog">Dog</option>
-            <option value="cat">Cat</option>
-          </select>
-        </div>
-        <button onClick={handleAddPet}>Add Pet</button>
+
+        <button
+          className="mt-5 border-none bg-red-600 text-white"
+          onClick={handleAddPet}
+        >
+          Add Pet
+        </button>
       </div>
+
+      <ListPet pets={pets} />
     </div>
   );
 }
